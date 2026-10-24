@@ -12,7 +12,6 @@ def load_tasks():
             with open(FILE, "r") as f:
                 return json.load(f)
         except json.JSONDecodeError:
-            # Catch the error if the file is empty or broken, and just start fresh
             return []
     return []
 
@@ -20,9 +19,6 @@ def save_tasks(tasks):
     with open(FILE, "w") as f:
         json.dump(tasks, f, indent=4)
 
-# ---------------------------------------------------------
-# 1. BASH NOTIFICATION MODE (Used by remind.sh)
-# ---------------------------------------------------------
 if len(sys.argv) > 1 and sys.argv[1] == "show":
     tasks = load_tasks()
     active_tasks = [t for t in tasks if t.get("status", "active") == "active"]
@@ -33,17 +29,13 @@ if len(sys.argv) > 1 and sys.argv[1] == "show":
         print("Here is everything you currently need to complete:\n")
         for t in active_tasks:
             print(f"• [{t['subject']}] {t['task']}")
-    sys.exit() # Stop the script here so the web server doesn't boot during a background check
+    sys.exit()
 
-# ---------------------------------------------------------
-# 2. WEB GUI MODE (HTML/CSS)
-# ---------------------------------------------------------
 app = Flask(__name__)
 
 @app.route("/")
 def index():
     tasks = load_tasks()
-    # We grab the actual index number so we know exactly which one to mark as done later
     active_tasks = [(i, t) for i, t in enumerate(tasks) if t.get("status", "active") == "active"]
     return render_template("index.html", subjects=SUBJECTS, tasks=active_tasks)
 
@@ -51,9 +43,9 @@ def index():
 def add():
     subj = request.form.get("subject")
     if subj == "OTHERS":
-        subj = request.form.get("custom_subject").strip()
+        subj = request.form.get("custom_subject", "").strip()
     
-    task_text = request.form.get("task").strip()
+    task_text = request.form.get("task", "").strip()
     
     if subj and task_text:
         tasks = load_tasks()
@@ -73,9 +65,8 @@ def mark_done(task_id):
 @app.route("/archive")
 def archive():
     tasks = load_tasks()
-    done_tasks = [t for t in tasks if t.get("status") == "done"]
+    done_tasks = [(i, t) for i, t in enumerate(tasks) if t.get("status") == "done"]
     return render_template("archive.html", tasks=done_tasks)
 
 if __name__ == "__main__":
-    # Start the local web server
     app.run(debug=True, port=5000)

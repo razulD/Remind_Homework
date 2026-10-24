@@ -1,58 +1,54 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Homework Manager</title>
-    <style>
-        body { background-color: black; color: white; font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
-        h2 { border-bottom: 2px solid white; padding-bottom: 10px; }
-        form { background-color: #111; padding: 20px; border: 1px solid white; margin-bottom: 30px; }
-        input, select, button { padding: 10px; margin: 5px 0; width: 100%; box-sizing: border-box; font-size: 16px; }
-        button { background-color: white; color: black; font-weight: bold; cursor: pointer; border: none; margin-top: 15px; }
-        button:hover { background-color: #ccc; }
-        .task-card { border: 1px solid white; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .done-btn { background-color: white; color: black; width: auto; margin: 0; padding: 5px 15px; text-decoration: none; font-weight: bold; }
-        .nav-link { color: gray; text-decoration: none; display: block; text-align: center; margin-top: 20px; }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-    <h2>--- Add New Homework ---</h2>
-    <form action="/add" method="POST">
-        <label>1. Select Subject:</label>
-        <select name="subject" id="subjectSelect" onchange="toggleCustom()">
-            {% for sub in subjects %}
-                <option value="{{ sub }}">{{ sub }}</option>
+    <div class="container">
+        <section>
+            <h2>Add New Homework</h2>
+            <form action="/add" method="POST">
+                <label for="subjectSelect">1. Select Subject</label>
+                <select name="subject" id="subjectSelect" onchange="toggleCustom()">
+                    {% for sub in subjects %}
+                        <option value="{{ sub }}">{{ sub }}</option>
+                    {% endfor %}
+                </select>
+                
+                <input type="text" name="custom_subject" id="customInput" placeholder="Type custom subject..." style="display:none;">
+                
+                <label for="taskInput">2. What is the homework?</label>
+                <input type="text" name="task" id="taskInput" placeholder="e.g. Read Chapter 4 & finish exercise 2" required>
+                
+                <button type="submit">Add Homework</button>
+            </form>
+        </section>
+
+        <section>
+            <h2>Active Homework</h2>
+            {% if not tasks %}
+                <p class="empty-msg">Nothing to do right now!</p>
+            {% endif %}
+
+            {% for index, t in tasks %}
+                <div class="task-card">
+                    <div class="task-info">
+                        <span class="subject-tag">{{ t.subject }}</span>
+                        <span class="task-text">{{ t.task }}</span>
+                    </div>
+                    <a href="/done/{{ index }}" class="done-btn">Mark Done</a>
+                </div>
             {% endfor %}
-        </select>
-        
-        <input type="text" name="custom_subject" id="customInput" placeholder="Type custom subject..." style="display:none;">
-        
-        <label style="display:block; margin-top:15px;">2. What is the homework?</label>
-        <input type="text" name="task" required>
-        
-        <button type="submit">ADD HOMEWORK</button>
-    </form>
+        </section>
 
-    <h2>--- Active Homework ---</h2>
-    {% if not tasks %}
-        <p style="color: gray;">Nothing to do right now!</p>
-    {% endif %}
-
-    {% for index, t in tasks %}
-        <div class="task-card">
-            <div>
-                <strong>[{{ t.subject }}]</strong><br>
-                {{ t.task }}
-            </div>
-            <!-- This button routes to the /done/ URL to update the backend -->
-            <a href="/done/{{ index }}" class="done-btn">Mark Done</a>
-        </div>
-    {% endfor %}
-
-    <a href="/archive" class="nav-link">View Archived Homework →</a>
+        <a href="/archive" class="nav-link">View Archived Homework →</a>
+    </div>
 
     <script>
-        // A tiny bit of JavaScript to hide/show the custom subject box
         function toggleCustom() {
             var select = document.getElementById("subjectSelect");
             var custom = document.getElementById("customInput");

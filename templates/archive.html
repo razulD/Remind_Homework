@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archived Homework</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+        <a href="/" class="back-link">← Back to Active Homework</a>
+
+        <section>
+            <h2>Completed Tasks</h2>
+
+            {% if not tasks %}
+                <p class="empty-msg">No completed homework yet.</p>
+            {% endif %}
+
+            {% for index, t in tasks %}
+                <div class="task-card archive-card">
+                    <div class="task-info">
+                        <span class="subject-tag archived-tag">{{ t.subject }}</span>
+                        <span class="task-text archived-text">{{ t.task }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </section>
+    </div>
+
+</body>
+</html>
